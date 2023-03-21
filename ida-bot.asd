@@ -23,10 +23,13 @@
                "drakma")
   :components ((:module "src"
                 :components
-                ((:file "main" :depends-on ("web" "config" "commands"))
+                ((:file "main" :depends-on ("web" "config" "commands" "extensions"))
                  (:file "web" :depends-on ("util" "commands"))
-                 (:file "commands" :depends-on ("util" "owncast"))
+                 (:file "extensions" :depends-on ("owncast" "services" "commands"
+                                                  "util" "config"))
+                 (:file "commands" :depends-on ("util"))
                  (:file "owncast" :depends-on ("util" "config"))
+                 (:file "services" :depends-on ("util"))
                  (:file "util")
                  (:file "config"))))
   :description ""

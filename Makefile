@@ -17,7 +17,10 @@ endif
 
 all:
 	$(LISP) $(CMDS)
-	cp -r commands bin/
 
 clean: 
 	rm -rf bin/
+
+extensions:
+	cp -r commands bin/
+	cp -r services bin/

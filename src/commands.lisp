@@ -28,42 +28,25 @@
         (cmd (str:concat "!" command)))
     
     ;; ensure each command has unique commands
-    (unless (some #'(lambda (x)
-                      (string= command (command-string x)))
-                  *commands*)
-      `(prog1
-           (push (make-instance 'bot-command :command ,cmd
-                                             :priority ,pri
-                                             :type ,type
-                                             :function
-                                             (lambda (it)
-                                               (let ((type (agetf it "type"))
-                                                     (data (agetf it "eventData")))
-                                                 (when (and (check-type-symbol ,type type)
-                                                            (str:starts-with-p ,cmd (agetf data "body")))
-                                                   ,@body))))
-                 *commands*)
-         (setf *commands* (sort *commands* #'< :key #'command-priority))))))
+    (if (member command *commands* :key command-string :test #'equal)
+        (format t "A command with the trigger '~A' already exists. Not loading current command" command)
+        `(prog1
+             (push (make-instance 'bot-command :command ,cmd
+                                               :priority ,pri
+                                               :type ,type
+                                               :function
+                                               (lambda (it)
+                                                 (let ((type (agetf it "type"))
+                                                       (data (agetf it "eventData")))
+                                                   (when (and (check-type-symbol ,type type)
+                                                              (str:starts-with-p ,cmd (agetf data "body")))
+                                                     ,@body))))
+                   *commands*)
+           (setf *commands* (sort *commands* #'< :key #'command-priority))))))
 
 (defun process-commands (message)
   "process each command based on priority"
   (loop :for cmd :in *commands*
         :do (funcall (command-function cmd) message)))
-
-(in-package :cl-user)
-(defpackage ida-bot.extension
-  (:use :cl :ida-bot.util :ida-bot.commands
-        :ida-bot.actions :ida-bot.config)
-  (:export :load-commands))
-(in-package :ida-bot.extension)
-
-(defun load-commands ()
-  "loads all commands from subdirectory"
-  (unless (uiop:directory-exists-p "./commands/")
-    (format t "The command directory doesn't exist. Please create it and fill it with lisp commands"))
-
-  (loop :for file :in (uiop:directory-files "./commands/" "*.lisp")
-        :do (format t "Loading file ~A~%" file)
-            (load file)))
       
     
