@@ -15,7 +15,11 @@ ifeq ($(LISP),)
 	$(error "No lisps found")
 endif
 
-all:
+.PHONY: clean all extensions
+
+all: ida-bot
+
+ida-bot:
 	$(LISP) $(CMDS)
 
 clean: 
@@ -24,3 +28,4 @@ clean:
 extensions:
 	cp -r commands bin/
 	cp -r services bin/
+	cp -r handlers bin/
