@@ -6,6 +6,8 @@
    :agetf)
   (:import-from :ida-bot.commands
    :process-commands)
+  (:import-from :ida-bot.handler
+                :run-handlers)
   (:export :*web*))
 (in-package :ida-bot.web)
 
@@ -24,6 +26,7 @@
 
 @route POST "/webhook"
 (defun parse-webhooks (&key _parsed)
+  (run-handlers _parsed)
   (process-commands _parsed))
   
 

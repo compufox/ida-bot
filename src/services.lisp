@@ -34,12 +34,12 @@
     (stop-service srv)))
 
 (defmethod start-service ((srv service))
-  (setf (service-running srv) t)
+  (setf (slot-value srv 'running) t)
   (-> (:name (service-id srv))
       (funcall (service-function srv))))
 
 (defmethod stop-service ((srv service))
-  (setf (service-running srv) nil)
+  (setf (slot-value srv 'running) nil)
   (bt:join-thread (find-if (lambda (th)
                              (search (service-id srv) (bt:thread-name th)))
                            (bt:all-threads))))

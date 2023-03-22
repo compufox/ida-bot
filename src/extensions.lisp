@@ -1,7 +1,7 @@
 (defpackage ida-bot.extension
   (:use :cl :ida-bot.util :ida-bot.commands
         :ida-bot.actions :ida-bot.config
-        :ida-bot.services)
+        :ida-bot.services :ida-bot.handlers)
   (:export :load-commands
            :load-services))
 (in-package :ida-bot.extension)

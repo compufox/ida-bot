@@ -24,9 +24,10 @@
   :components ((:module "src"
                 :components
                 ((:file "main" :depends-on ("web" "config" "commands" "extensions"))
-                 (:file "web" :depends-on ("util" "commands"))
                  (:file "extensions" :depends-on ("owncast" "services" "commands"
-                                                  "util" "config"))
+                                                  "util" "config" "web" "handlers"))
+                 (:file "web" :depends-on ("util" "commands" "handlers"))
+                 (:file "handlers" :depends-on ("util"))
                  (:file "commands" :depends-on ("util"))
                  (:file "owncast" :depends-on ("util" "config"))
                  (:file "services" :depends-on ("util"))

@@ -1,6 +1,5 @@
-# owncast-bot
-
-a quick and dirty chat bot for owncast
+# ida-bot
+## a chatbot for owncast servers built with alien technology
 
 ## Usage
 
