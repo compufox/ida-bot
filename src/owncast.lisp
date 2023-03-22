@@ -31,7 +31,7 @@
 
 (defun moderate-chat (message-id set-visible)
   "moderates a chat message with id MESSAGE-ID, setting it visible based on SET-VISIBLE"
-  (owncast-request "/api/chat/messagevisibility"
+  (owncast-request "/api/integrations/chat/messagevisibility"
                    `(("visible" . ,(when set-visible t))
                      ("idArray" . (,message-id)))))
 
