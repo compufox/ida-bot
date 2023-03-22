@@ -22,7 +22,7 @@
 ;;
 ;; Routing rules
 
-@route POST "/ingest"
+@route POST "/webhook"
 (defun parse-webhooks (&key _parsed)
   (process-commands _parsed))
   
