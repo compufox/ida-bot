@@ -19,22 +19,26 @@
    (function :initarg :function
              :reader handler-function)))
 
-(defmacro define-handler ((id &key (type :chat) priority) &body body)
+(defmacro define-handler ((id &key (type :chat) priority depends-on) &body body)
   (if (member id *handlers* :key #'handler-id :test #'equal)
       (format t "A handler with the id '~A' already exists. Not loading current handler" id)
-      `(prog1
-           (push (make-instance 'handler
-                                :id ,id
-                                :priority ,(or priority (1+ (length *handlers*)))
-                                :function
-                                (lambda (it)
-                                  (let* ((event-type (agetf it "type"))
-                                         (event-data (agetf it "eventData"))
-                                         (*handler-data* event-data))
-                                    (when (check-type-symbol ,type event-type)
-                                      ,@body))))
-                 *handlers*)
-         (setf *handlers* (sort *handlers* #'< :key #'handler-priority)))))
+      (if (and depends-on (member depends-on *handlers* :key #'handler-id :test #'equal))
+          `(prog1
+               (push (make-instance 'handler
+                                    :id ,id
+                                    
+                                    ;; TODO: needs to factor in dependencies
+                                    :priority ,(or priority (1+ (length *handlers*)))
+                                    :function
+                                    (lambda (it)
+                                      (let* ((event-type (agetf it "type"))
+                                             (event-data (agetf it "eventData"))
+                                             (*handler-data* event-data))
+                                        (when (check-type-symbol ,type event-type)
+                                          ,@body))))
+                     *handlers*)
+             (setf *handlers* (sort *handlers* #'< :key #'handler-priority)))
+          (format t "Dependency ~A not met for handler ~A. Not loading.~%" depends-on id))))
 
 (defun run-handlers (incoming-message)
   (loop :for hndlr :in *handlers*
