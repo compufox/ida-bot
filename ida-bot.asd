@@ -3,6 +3,7 @@
   :author "a. fox"
   :license ""
   :depends-on ("bordeaux-threads"
+               "log4cl"
                "clack"
                "lack"
                "caveman2"
@@ -25,11 +26,12 @@
                 :components
                 ((:file "main" :depends-on ("web" "config" "commands" "extensions"))
                  (:file "extensions" :depends-on ("owncast" "services" "commands"
-                                                  "util" "config" "web" "handlers"))
+                                                  "util" "config" "web" "handlers"
+                                                  "conditions"))
                  (:file "web" :depends-on ("util" "commands" "handlers"))
                  (:file "owncast" :depends-on ("util" "config"))
                  (:file "services" :depends-on ("util" "conditions"))
-                 (:file "handlers" :depends-on ("util"))
+                 (:file "handlers" :depends-on ("util" "conditions"))
                  (:file "commands" :depends-on ("util"))
                  (:file "util" :depends-on ("conditions"))
                  (:file "conditions")

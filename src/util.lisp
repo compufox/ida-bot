@@ -12,7 +12,10 @@
    :->
    :after
    :after-every
-   :parse-time))
+   :parse-time
+   :ensure-list
+   :log-info
+   :log-debug))
 
 (in-package ida-bot.util)
 
@@ -39,7 +42,7 @@
                              (thread-should-end ()
                                (return-from :thread))
                              (error (e)
-                               (format t "encountered error on thread ~A: ~A~%" ,name e)))))
+                               (log:error "encountered error on thread ~A: ~A~%" ,name e)))))
                      :name ,n)))
 
 (defmacro after ((amount duration) &body body)
@@ -75,3 +78,14 @@ if RUN-IMMEDIATELY is non-nil, runs BODY once before waiting for next invocation
 	      604800)
 	     (t (error "unknown duration")))))
   
+(defun ensure-list (obj)
+  (typecase obj
+    (list obj)
+    (t (list obj))))
+
+(defmacro log-info (&rest args)
+  `(when (log:info) (log:info ,@args)))
+
+(defmacro log-debug (&rest args)
+  `(when (log:debug) (log:debug ,@args)))
+

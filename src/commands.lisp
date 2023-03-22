@@ -28,7 +28,7 @@
     
     ;; ensure each command has unique commands
     (if (member command *commands* :key #'command-string :test #'equal)
-        (format t "A command with the trigger '~A' already exists. Not loading current command.~%" command)
+        (log:warn "A command with the trigger '~A' already exists. Not loading current command.~%" command)
         `(prog1
              (push (make-instance 'bot-command :command ,cmd
                                                :function

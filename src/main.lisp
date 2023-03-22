@@ -115,7 +115,9 @@
   
     (let ((server #+(and Unix SBCL) :woo
                   #-(and Unix SBCL) :hunchentoot))
-    
+
+      (log:info "Starting bot...")
+      
       (start :port (env :port (or (getf opts :port) 9000)) :server server)
     
       (handler-case
@@ -124,8 +126,8 @@
                                        (search (string-downcase (string server)) (bt:thread-name th)))
                                      (bt:all-threads))))
         (user-abort ())
-        (error (c) (format t "Woops, an unknown error occured:~&~a~&" c)))
+        (error (c) (log:error "Woops, an unknown error occured:~&~a~&" c)))
     
-      (format t "~&Quitting bot.")
+      (log:info "~&Quitting bot.")
       (stop)
       (ida-bot.services:stop-services))))

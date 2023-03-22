@@ -51,7 +51,7 @@
 
 (defmacro define-service ((id &key enabled) &body body)
   (if (member id *services* :key #'service-id :test #'equal)
-      (format t "Service with ID '~A' already exists. Not loading current service~&" id)
+      (log:warn "Service with ID '~A' already exists. Not loading current service~&" id)
       `(prog1 (push (make-instance 'service
                                    :id ,id
                                    :enabled ,enabled
