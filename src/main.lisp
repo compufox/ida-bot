@@ -110,8 +110,7 @@
           (format t "please specify a config file to use")
           (uiop:quit 1)))
   
-    (ida-bot.extension:load-commands)
-    (ida-bot.extension:load-services)
+    (ida-bot.extension-loader:load-extensions)
     (ida-bot.services:start-services)
   
     (let ((server #+(and Unix SBCL) :woo

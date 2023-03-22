@@ -1,16 +1,12 @@
-(defpackage ida-bot.extension
-  (:use :cl :ida-bot.util :ida-bot.commands
-        :ida-bot.actions :ida-bot.config
-        :ida-bot.services :ida-bot.handlers)
-  (:export :load-commands
-           :load-services))
-(in-package :ida-bot.extension)
+(defpackage ida-bot.extension-loader
+  (:use :cl)
+  (:export :load-extensions))
+(in-package ida-bot.extension-loader)
 
-(defun load-commands ()
-  (load-directory "./commands/"))
-
-(defun load-services ()
-  (load-directory "./services/"))
+(defun load-extensions ()
+  (load-directory "./commands/")
+  (load-directory "./services/")
+  (load-directory "./handlers/"))
 
 (defun load-directory (dir)
   "loads all code from subdirectory"
@@ -20,4 +16,9 @@
             (load file))
       (format t "Directory ~A doesn't exist. Please create it and fill it with extensions~&" dir)))
 
-  
+(in-package :cl-user)
+(defpackage ida-bot.extension
+  (:use :cl :ida-bot.util :ida-bot.commands
+        :ida-bot.actions :ida-bot.config
+        :ida-bot.services :ida-bot.handler))
+(in-package :ida-bot.extension)

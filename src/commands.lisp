@@ -1,7 +1,8 @@
 (defpackage ida-bot.commands
   (:use :cl :ida-bot.util)
   (:export :define-command
-           :process-commands))
+   :process-commands
+   :*command-data*))
 
 (in-package :ida-bot.commands)
 
@@ -9,14 +10,15 @@
 ;; this should ideally load a directory with all
 ;; 
 
+(defvar *command-data* nil
+  "")
+
 (defvar *commands* nil
   "list of commands")
 
 (defclass bot-command ()
   ((priority :accessor command-priority
              :initarg :priority)
-   (type :reader command-type
-         :initarg :type)
    (command :reader command-string
             :initarg :command)
    (function :accessor command-function
@@ -33,13 +35,13 @@
         `(prog1
              (push (make-instance 'bot-command :command ,cmd
                                                :priority ,pri
-                                               :type ,type
                                                :function
                                                (lambda (it)
-                                                 (let ((type (agetf it "type"))
-                                                       (data (agetf it "eventData")))
-                                                   (when (and (check-type-symbol ,type type)
-                                                              (str:starts-with-p ,cmd (agetf data "body")))
+                                                 (let* ((event-type (agetf it "type"))
+                                                        (event-data (agetf it "eventData"))
+                                                        (*command-data* event-data))
+                                                   (when (and (check-type-symbol ,type event-type)
+                                                              (str:starts-with-p ,cmd (agetf event-data "body")))
                                                      ,@body))))
                    *commands*)
            (setf *commands* (sort *commands* #'< :key #'command-priority))))))

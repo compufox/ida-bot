@@ -1,8 +1,12 @@
 (defpackage ida-bot.handler
   (:use :cl :ida-bot.util)
   (:export :define-handler
-           :run-handlers))
+   :run-handlers
+   :*handler-data*))
 (in-package :ida-bot.handler)
+
+(defvar *handler-data* nil
+  "")
 
 (defvar *handlers* nil
   "list of defined handlers")
@@ -24,8 +28,9 @@
                                 :priority ,(or priority (1+ (length *handlers*)))
                                 :function
                                 (lambda (it)
-                                  (let ((event-type (agetf it "type"))
-                                        (event-data (agetf it "eventData")))
+                                  (let* ((event-type (agetf it "type"))
+                                         (event-data (agetf it "eventData"))
+                                         (*handler-data* event-data))
                                     (when (check-type-symbol ,type event-type)
                                       ,@body))))
                  *handlers*)
