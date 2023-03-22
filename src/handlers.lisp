@@ -27,7 +27,7 @@
   (if (member id *handlers* :key #'handler-id :test #'equal)
       (log:warn "Handler with id '~A' already loaded, skipping loading.~%")
       (if (and depends-on (not (find depends-on *handlers* :key #'handler-id :test #'equal)))
-          (signal 'dependency-not-found :dep-id id)
+          (signal 'dependency-not-found :dep-id depends-on)
           `(prog1
                (push (make-instance 'handler
                                     :id ,id
