@@ -1,5 +1,7 @@
 (defpackage ida-bot.services
   (:use :cl :ida-bot.util)
+  (:import-from :ida-bot.conditions
+                :thread-should-end)
   (:export
 
    :service-enabled
@@ -40,9 +42,12 @@
 
 (defmethod stop-service ((srv service))
   (setf (slot-value srv 'running) nil)
-  (bt:join-thread (find-if (lambda (th)
+  (flet ((end-thread () (signal 'thread-should-end)))
+    (let ((thread (find-if (lambda (th)
                              (search (service-id srv) (bt:thread-name th)))
                            (bt:all-threads))))
+      (bt:interrupt-thread thread #'end-thread)
+      (bt:join-thread thread))))
 
 (defmacro define-service ((id &key enabled) &body body)
   (if (member id *services* :key #'service-id :test #'equal)

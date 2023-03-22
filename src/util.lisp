@@ -2,7 +2,9 @@
 (defpackage ida-bot.util
   (:use :cl)
   (:import-from :bt
-                :make-thread)
+   :make-thread)
+  (:import-from :ida-bot.conditions
+                :thread-should-end)
   (:export
 
    :agetf
@@ -30,7 +32,15 @@
 
 (defmacro -> ((&key name) &body body)
   (let ((n (or name (string (gensym)))))
-    `(bt:make-thread #'(lambda () ,@body) :name ,n)))
+    `(bt:make-thread #'(lambda ()
+                         (block :thread
+                           (handler-case
+                               ,@body
+                             (thread-should-end ()
+                               (return-from :thread))
+                             (error (e)
+                               (format t "encountered error on thread ~A: ~A~%" ,name e)))))
+                     :name ,n)))
 
 (defmacro after ((amount duration) &body body)
   "runs BODY after AMOUNT of DURATION"

@@ -27,11 +27,12 @@
                  (:file "extensions" :depends-on ("owncast" "services" "commands"
                                                   "util" "config" "web" "handlers"))
                  (:file "web" :depends-on ("util" "commands" "handlers"))
+                 (:file "owncast" :depends-on ("util" "config"))
+                 (:file "services" :depends-on ("util" "conditions"))
                  (:file "handlers" :depends-on ("util"))
                  (:file "commands" :depends-on ("util"))
-                 (:file "owncast" :depends-on ("util" "config"))
-                 (:file "services" :depends-on ("util"))
-                 (:file "util")
+                 (:file "util" :depends-on ("conditions"))
+                 (:file "conditions")
                  (:file "config"))))
   :description ""
   :in-order-to ((test-op (test-op "ida-bot-test")))
