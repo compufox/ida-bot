@@ -1,5 +1,13 @@
 access-token = a cool token
 stream-url = https://my.stream.live
 
+# see commands/motd.lisp to see this in use!
 motd = Thanks for joining the stream, hope you're having a good time! I try to stream every wednesday, so if youre interested feel free to join!
 
+# a comma separated list of words you would like to be automatically moderated if they are
+#  said in your chat
+automod-banned-words = poopy, stinky, doodoohead
+
+# the autoban handler defaults to 5 strikes before the user is banned
+#  setting this changes that default
+autoban-strike-count = 2
