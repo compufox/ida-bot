@@ -23,6 +23,8 @@
        :reader service-id)
    (function :initarg :function
              :reader service-function)
+   (wants-stream :initarg :wants-stream
+                 :reader :service-wants-stream)
    (enabled :initarg :enabled
             :accessor service-enabled-p)
    (running :initform nil
@@ -49,26 +51,38 @@
       (bt:interrupt-thread thread #'end-thread)
       (bt:join-thread thread))))
 
-(defmacro define-service ((id &key enabled) &body body)
+(defmacro define-service ((id &key start-immediately start-with-stream) &body body)
   (if (member id *services* :key #'service-id :test #'equal)
       (log:warn "Service with ID '~A' already exists. Not loading current service~&" id)
-      `(prog1 (push (make-instance 'service
-                                   :id ,id
-                                   :enabled ,enabled
-                                   :function
-                                   (lambda ()
-                                     ,@body))
-                    *services*))))
+      `(let ((service (make-instance 'service
+                                     :id ,id
+                                     :enabled nil
+                                     :wants-stream ,start-with-stream
+                                     :function
+                                     (lambda ()
+                                       ,@body))))
+         (push service *services*)
+         ,(when start-immediately `(setf (service-enabled service) t))
+         service)))
 
 (defun search-for-service (id)
   (member id *services* :key #'service-id :test #'equal))
 
-(defun start-services ()
-  (mapcar #'start-service
-          (remove-if-not #'(lambda (s)
-                             (or (service-enabled-p s)
-                                 (service-running-p s)))
-                         *services*)))
+(defun start-services (&key (stream-dependent t))
+  "starts services
 
-(defun stop-services ()
-  (mapcar #'stop-service (remove-if-not #'service-running-p *services*)))
+if STREAM-DEPENDENT is non-nil, only starts services that are flagged as START-WITH-STREAM"
+  (let ((services (if stream-dependent
+                      (remove-if-not #'service-wants-stream *services*)
+                      *services*)))
+    (mapcar #'start-service services)))
+            
+
+(defun stop-services (&key (stream-dependent t))
+  "stops running services
+
+if STREAM-DEPENDENT is non-nil only stops services that are flagged as START-WITH-STREAM"
+  (let ((services (if stream-dependent
+                      (remove-if-not #'service-wants-stream-p *services*)
+                      *services*)))
+    (mapcar #'stop-service (remove-if-not #'service-running-p services))))

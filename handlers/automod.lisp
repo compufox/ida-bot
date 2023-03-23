@@ -1,6 +1,8 @@
 (in-package :ida-bot.extension)
 
-(defvar *banned-words* (str:split #\, (env :automod-banned-words))
+;; TODO: change this to generate a regex from the banned words
+;;  that should improve performace(?) on checking
+(defvar *banned-words* (str:words (env :automod-banned-words))
   "a list containing our banned words pulled from our config")
 
 (defvar *logged-messages* (make-hash-table :size 20 :rehash-size 2.5
@@ -20,9 +22,4 @@ hash value is list of moderated chat ids")
                (moderate-chat (agetf *handler-data* "id") nil)
                (push (agetf *handler-data* "id")
                      (gethash (agetf user "id") *logged-messages*))
-               #|
-               (setf (gethash (agetf user "id") *logged-messages*)
-                     (append (gethash (agetf user "id") *logged-messages*)
-                             (list (agetf *handler-data* "id"))))
-                 |#    
                (return))))
