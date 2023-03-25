@@ -4,6 +4,9 @@ stream-url = https://my.stream.live
 # see commands/motd.lisp to see this in use!
 motd = Thanks for joining the stream, hope you're having a good time! I try to stream every wednesday, so if youre interested feel free to join!
 
+# see services/announcer.lisp to see this in use!
+announcement = Blah Blah! Check out my new blog https://example.blog
+
 # a comma separated list of words you would like to be automatically moderated if they are
 #  said in your chat
 automod-banned-words = poopy, stinky, doodoohead

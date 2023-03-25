@@ -26,6 +26,7 @@ clean:
 	rm -rf bin/
 
 extensions:
-	cp -r commands bin/
-	cp -r services bin/
-	cp -r handlers bin/
+	mkdir -p bin/extensions
+	cp commands/* bin/extensions/
+	cp services/* bin/extensions/
+	cp handlers/* bin/extensions/
