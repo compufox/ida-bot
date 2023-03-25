@@ -1,5 +1,5 @@
 (defpackage ida-bot.commands
-  (:use :cl :ida-bot.util)
+  (:use :cl :ida-bot.util :ida-bot.moderator)
   (:export :define-command
    :process-commands
    :*command-data*))
@@ -22,7 +22,10 @@
    (function :accessor command-function
              :initarg :function)))
 
-(defmacro define-command ((command &key (type :chat)) &body body)
+;; TODO: rework this to not use classes
+;; especially since its now just a text string and a function lmao
+
+(defmacro define-command ((command &key moderator-only) &body body)
   "create a command COMMAND"
   (let ((cmd (str:concat "!" command)))
     
@@ -30,15 +33,19 @@
     (if (member command *commands* :key #'command-string :test #'equal)
         (log:warn "A command with the trigger '~A' already exists. Not loading current command.~%" command)
         `(prog1
-             (push (make-instance 'bot-command :command ,cmd
-                                               :function
-                                               (lambda (it)
-                                                 (let* ((event-type (agetf it "type"))
-                                                        (event-data (agetf it "eventData"))
-                                                        (*command-data* event-data))
-                                                   (when (and (check-type-symbol ,type event-type)
-                                                              (str:starts-with-p ,cmd (agetf event-data "body")))
-                                                     ,@body))))
+             (push (make-instance 'bot-command
+                                  :command ,cmd
+                                  :function
+                                  (lambda (it)
+                                    (let* ((event-type (agetf it "type"))
+                                           (event-data (agetf it "eventData"))
+                                           (*command-data* event-data))
+                                      (when (and (check-type-symbol :chat event-type)
+                                                 (str:starts-with-p ,cmd (agetf event-data "body")))
+                                        ,@(if moderator-only
+                                              `(when (moderator-p (agetf (agetf event-data "user") "id"))
+                                                 ,@body)
+                                              `(,@body))))))
                    *commands*)))))
 
 (defun process-commands (message)

@@ -7,7 +7,8 @@
   (:import-from :ida-bot.commands
    :process-commands)
   (:import-from :ida-bot.handler
-                :run-handlers)
+   :run-handlers
+   :define-handler)
   (:export :*web*))
 (in-package :ida-bot.web)
 
@@ -20,6 +21,14 @@
 (defclass <web> (<app>) ())
 (defvar *web* (make-instance '<web>))
 (clear-routing-rules *web*)
+
+;;
+;; Handler that ensures we know who our moderators
+(define-handler ((string (gensym "MODERATOR-TRACKER")) :type :user-joined)
+    (let ((user-id (agetf (agetf *handler-data* "user") "id")))
+      (when (and (member "MODERATOR" (agetf *handler-data* "scopes") :test #'equal)
+                 (not (moderator-p user-id)))
+        (push user-id ida-bot.moderator::*moderator-list*))))
 
 ;;
 ;; Routing rules

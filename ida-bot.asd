@@ -27,13 +27,14 @@
                 ((:file "main" :depends-on ("web" "config" "commands" "extensions"))
                  (:file "extensions" :depends-on ("owncast" "services" "commands"
                                                   "util" "config" "web" "handlers"
-                                                  "conditions"))
-                 (:file "web" :depends-on ("util" "commands" "handlers"))
+                                                  "conditions" "moderators"))
+                 (:file "web" :depends-on ("util" "commands" "handlers" "moderators"))
                  (:file "owncast" :depends-on ("util" "config"))
                  (:file "services" :depends-on ("util" "conditions"))
                  (:file "handlers" :depends-on ("util" "conditions"))
-                 (:file "commands" :depends-on ("util"))
+                 (:file "commands" :depends-on ("util" "moderators"))
                  (:file "util" :depends-on ("conditions"))
+                 (:file "moderators")
                  (:file "conditions")
                  (:file "config"))))
   :description ""
