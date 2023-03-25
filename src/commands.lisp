@@ -2,28 +2,21 @@
   (:use :cl :ida-bot.util :ida-bot.moderator)
   (:export :define-command
    :process-commands
-   :*command-data*))
-
+   :*command-data*
+   :*command-message*))
 (in-package :ida-bot.commands)
 
-;; here is where i need to write the command loader
-;; this should ideally load a directory with all
-;; 
-
 (defvar *command-data* nil
-  "")
+  "alist structure containing the webhook eventdata payload")
 
-(defvar *commands* nil
-  "list of commands")
+(defvar *command-message* ""
+  "string containing the command chat message minus the command string itself")
 
-(defclass bot-command ()
-  ((command :reader command-string
-            :initarg :command)
-   (function :accessor command-function
-             :initarg :function)))
+(defvar *commands* (make-hash-table :test 'equal)
+  "hash-table of commands
 
-;; TODO: rework this to not use classes
-;; especially since its now just a text string and a function lmao
+key is command string
+value is command function")
 
 (defmacro define-command ((command &key moderator-only) &body body)
   "create a command COMMAND"
@@ -32,25 +25,21 @@
     ;; ensure each command has unique commands
     (if (member command *commands* :key #'command-string :test #'equal)
         (log:warn "A command with the trigger '~A' already exists. Not loading current command.~%" command)
-        `(prog1
-             (push (make-instance 'bot-command
-                                  :command ,cmd
-                                  :function
-                                  (lambda (it)
-                                    (let* ((event-type (agetf it "type"))
-                                           (event-data (agetf it "eventData"))
-                                           (*command-data* event-data))
-                                      (when (and (check-type-symbol :chat event-type)
-                                                 (str:starts-with-p ,cmd (agetf event-data "body")))
-                                        ,@(if moderator-only
-                                              `(when (moderator-p (agetf (agetf event-data "user") "id"))
-                                                 ,@body)
-                                              `(,@body))))))
-                   *commands*)))))
+        `(setf (gethash ,cmd *commands*)
+               #'(lambda (it)
+                   (let* ((event-type (agetf it "type"))
+                          (event-data (agetf it "eventData"))
+                          (*command-data* event-data))
+                     (when (and (check-type-symbol :chat event-type)
+                                (str:starts-with-p ,cmd (agetf event-data "body")))
+                       (let ((*handler-message* (str:replace-first ,cmd "" (agetf "body" event-data))))
+                         ,@(if moderator-only
+                               `((when (moderator-p (agetf (agetf event-data "user") "id"))
+                                   ,@body))
+                               `(,@body))))))))))
 
 (defun process-commands (message)
   "process each command based on priority"
   (loop :for cmd :in *commands*
-        :do (funcall (command-function cmd) message)))
-      
+        :do (funcall (gethash cmd *commands*) message)))
     
