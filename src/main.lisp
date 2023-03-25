@@ -38,7 +38,9 @@
 (defpackage ida-bot
   (:use :cl :with-user-abort)
   (:import-from :ida-bot.config
-                :env)
+   :env)
+  (:import-from :ida-bot.actions
+                :get-current-status)
   (:import-from :clack
    :clackup)
   (:import-from :unix-opts
@@ -118,7 +120,10 @@
   
     (ida-bot.extension-loader:load-extensions
      (getf opts :extension-directory "./extensions/"))
-    (ida-bot.services:start-services)
+
+    (if (agetf (get-current-status) "online")
+        (ida-bot.services:start-services :all t)
+        (ida-bot.services:start-services))
   
     (let ((server #+(and Unix SBCL) :woo
                   #-(and Unix SBCL) :hunchentoot))

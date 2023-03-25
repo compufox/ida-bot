@@ -68,13 +68,17 @@
 (defun search-for-service (id)
   (member id *services* :key #'service-id :test #'equal))
 
-(defun start-services (&key stream-dependent)
+(defun start-services (&key stream-dependent all)
   "starts services
 
-if STREAM-DEPENDENT is non-nil, only starts services that are flagged as START-WITH-STREAM"
-  (let ((services (if stream-dependent
-                      (remove-if-not #'service-wants-stream-p *services*)
-                      (remove-if #'service-wants-stream-p *services*))))
+if ALL is non-nil all services are started
+if STREAM-DEPENDENT is non-nil, only starts services that are flagged as START-WITH-STREAM
+
+if ALL and STREAM-DEPENDENT are both non-nil, all services are started"
+  (let ((services (cond
+                    ((all *services*)
+                     (stream-dependent (remove-if-not #'service-wants-stream-p *services*))
+                     (t (remove-if #'service-wants-stream-p *services*))))))
     (mapcar #'start-service services)))
 
 
@@ -82,9 +86,11 @@ if STREAM-DEPENDENT is non-nil, only starts services that are flagged as START-W
   "stops running services
 
 if ALL is non-nil all services are stopped
-if STREAM-DEPENDENT is non-nil only stops services that are flagged as START-WITH-STREAM"
-  (let ((services (if stream-dependent
-                      (remove-if-not #'service-wants-stream-p *services*)
-                      (if all *services*
-                          (remove-if #'service-wants-stream-p *services*)))))
+if STREAM-DEPENDENT is non-nil only stops services that are flagged as START-WITH-STREAM
+
+if ALL and STREAM-DEPENDENT are both non-nil, all services are started"
+  (let ((services (cond
+                    ((all *services*)
+                     (stream-dependent (remove-if-not #'service-wants-stream-p *services*))
+                     (t (remove-if #'service-wants-stream-p *services*))))))
     (mapcar #'stop-service (remove-if-not #'service-running-p services))))
