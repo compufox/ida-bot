@@ -137,4 +137,4 @@
     
       (log:info "~&Quitting bot.")
       (stop)
-      (ida-bot.services:stop-services))))
+      (ida-bot.services:stop-services :all t))))

@@ -24,7 +24,7 @@
    (function :initarg :function
              :reader service-function)
    (wants-stream :initarg :wants-stream
-                 :reader :service-wants-stream)
+                 :reader :service-wants-stream-p)
    (enabled :initarg :enabled
             :accessor service-enabled-p)
    (running :initform nil
@@ -68,21 +68,23 @@
 (defun search-for-service (id)
   (member id *services* :key #'service-id :test #'equal))
 
-(defun start-services (&key (stream-dependent t))
+(defun start-services (&key stream-dependent)
   "starts services
 
 if STREAM-DEPENDENT is non-nil, only starts services that are flagged as START-WITH-STREAM"
   (let ((services (if stream-dependent
-                      (remove-if-not #'service-wants-stream *services*)
-                      *services*)))
+                      (remove-if-not #'service-wants-stream-p *services*)
+                      (remove-if #'service-wants-stream-p *services*))))
     (mapcar #'start-service services)))
-            
 
-(defun stop-services (&key (stream-dependent t))
+
+(defun stop-services (&key stream-dependent all)
   "stops running services
 
+if ALL is non-nil all services are stopped
 if STREAM-DEPENDENT is non-nil only stops services that are flagged as START-WITH-STREAM"
   (let ((services (if stream-dependent
                       (remove-if-not #'service-wants-stream-p *services*)
-                      *services*)))
+                      (if all *services*
+                          (remove-if #'service-wants-stream-p *services*)))))
     (mapcar #'stop-service (remove-if-not #'service-running-p services))))
