@@ -5,9 +5,14 @@
   (:export :load-extensions))
 (in-package ida-bot.extension-loader)
 
-(defun load-extensions ()
+(declaim (inline ensure-directory-path load-extensions))
+
+(defun ensure-directory-path (d)
+  (if (str:ends-with-p "/" d) d (str:concat d "/")))
+
+(defun load-extensions (&rest dirs)
   (mapcar #'load-directory
-          '("./commands/" "./services/" "./handlers/")))
+          (mapcar #'ensure-directory-path dirs))) 
 
 (defun load-directory (dir)
   "loads all code from subdirectory"

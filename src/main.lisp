@@ -70,7 +70,13 @@
    :long "production")
   (:name :version
    :description "prints application version"
-   :long "version"))
+   :long "version")
+  (:name :extension-directory
+   :description "specifies where to look for extensions"
+   :short #\d
+   :long "extension-dir"
+   :arg-parser #'string
+   :meta-var "DIRECTORY"))
 
 (defvar *handler* nil)
 
@@ -110,7 +116,8 @@
           (format t "please specify a config file to use")
           (uiop:quit 1)))
   
-    (ida-bot.extension-loader:load-extensions)
+    (ida-bot.extension-loader:load-extensions
+     (getf opts :extension-directory "./extensions/"))
     (ida-bot.services:start-services)
   
     (let ((server #+(and Unix SBCL) :woo
