@@ -17,12 +17,15 @@
 
 (defun owncast-request (api-path &key payload (method :post) (content-type "application/json"))
   "runs the owncast request"
-  (http-request (str:concat (env :stream-url) api-path)
-                :method method
-                :content-type content-type
-                :accept "application/json"
-                :content (when payload (stringify (alist-hash-table payload)))
-                :additional-headers `(("Authorization" . ,(str:concat "Bearer " (env :access-token))))))
+  (multiple-value-bind (resp status) (http-request (str:concat (env :stream-url) api-path)
+                                                   :method method
+                                                   :content-type content-type
+                                                   :accept "application/json"
+                                                   :content (when payload (stringify (alist-hash-table payload)))
+                                                   :additional-headers `(("Authorization" . ,(str:concat "Bearer " (env :access-token)))))
+    (let ((response (coerce (map 'vector #'code-char resp) 'string)))
+      (values (alexandria:hash-table-alist (com.inuoe.jzon:parse response))
+              status))))
 
 (defun set-stream-title (new-title)
   (owncast-request "/api/integrations/streamtitle"
@@ -74,3 +77,9 @@
 
 (defun get-chat-backlog ()
   (owncast-request "/api/integrations/chat" :method :get))
+
+(defun get-information ()
+  (owncast-request "/api/config" :method :get))
+
+(defun get-current-status ()
+  (owncast-request "/api/status" :method :get))
