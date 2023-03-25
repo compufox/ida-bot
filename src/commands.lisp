@@ -23,7 +23,7 @@ value is command function")
   (let ((cmd (str:concat "!" command)))
     
     ;; ensure each command has unique commands
-    (if (member command *commands* :key #'command-string :test #'equal)
+    (if (gethash cmd *commands*)
         (log:warn "A command with the trigger '~A' already exists. Not loading current command.~%" command)
         `(setf (gethash ,cmd *commands*)
                #'(lambda (it)
@@ -32,7 +32,7 @@ value is command function")
                           (*command-data* event-data))
                      (when (and (check-type-symbol :chat event-type)
                                 (str:starts-with-p ,cmd (agetf event-data "body")))
-                       (let ((*handler-message* (str:replace-first ,cmd "" (agetf "body" event-data))))
+                       (let ((*command-message* (str:replace-first ,cmd "" (agetf event-data "body"))))
                          ,@(if moderator-only
                                `((when (moderator-p (agetf (agetf event-data "user") "id"))
                                    ,@body))
