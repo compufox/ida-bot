@@ -21,7 +21,7 @@ values are vote counts")
   (setf *current-poll* (make-hash-table :size 4))
   (let* ((command-parms (str:words *command-message*))
          (time-limit (first command-parms))
-         (poll-options (loop :with poll-options (str:split #\, (apply #'str:concat (rest command-parms)))
+         (poll-options (loop :with poll-options := (str:split #\, (apply #'str:concat (rest command-parms)))
                              :for option :in poll-options
                              :for index :from 1 :upto (length poll-options)
                              :do (setf (gethash index *current-poll*)

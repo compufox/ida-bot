@@ -40,6 +40,6 @@ value is command function")
 
 (defun process-commands (message)
   "process each command based on priority"
-  (loop :for cmd :in *commands*
-        :do (funcall (gethash cmd *commands*) message)))
+  (loop :for func :being :the :hash-value :of *commands*
+        :do (funcall func message)))
     

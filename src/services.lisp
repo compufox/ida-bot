@@ -24,7 +24,7 @@
    (function :initarg :function
              :reader service-function)
    (wants-stream :initarg :wants-stream
-                 :reader :service-wants-stream-p)
+                 :reader service-wants-stream-p)
    (enabled :initarg :enabled
             :accessor service-enabled-p)
    (running :initform nil
@@ -76,9 +76,9 @@ if STREAM-DEPENDENT is non-nil, only starts services that are flagged as START-W
 
 if ALL and STREAM-DEPENDENT are both non-nil, all services are started"
   (let ((services (cond
-                    ((all *services*)
-                     (stream-dependent (remove-if-not #'service-wants-stream-p *services*))
-                     (t (remove-if #'service-wants-stream-p *services*))))))
+                    (all *services*)
+                    (stream-dependent (remove-if-not #'service-wants-stream-p *services*))
+                    (t (remove-if #'service-wants-stream-p *services*)))))
     (mapcar #'start-service services)))
 
 
@@ -90,7 +90,7 @@ if STREAM-DEPENDENT is non-nil only stops services that are flagged as START-WIT
 
 if ALL and STREAM-DEPENDENT are both non-nil, all services are started"
   (let ((services (cond
-                    ((all *services*)
-                     (stream-dependent (remove-if-not #'service-wants-stream-p *services*))
-                     (t (remove-if #'service-wants-stream-p *services*))))))
+                    (all *services*)
+                    (stream-dependent (remove-if-not #'service-wants-stream-p *services*))
+                    (t (remove-if #'service-wants-stream-p *services*)))))
     (mapcar #'stop-service (remove-if-not #'service-running-p services))))
