@@ -14,4 +14,8 @@
                             (setf (gethash user-id *user-strikes*) user-strikes)
                             (when (<= (env :autoban-strike-count 5)
                                       user-strikes)
-                              (moderate-user user-id nil)))))))
+                              ;; TODO: once integrations can properly ban users
+                              ;;  the following line can be removed and the
+                              ;;  commented out line can be used.
+                              (log:info "User ~A has been flagged multiple times and should be banned" user-id)))))))
+                              ;;(moderate-user user-id nil)))))))
