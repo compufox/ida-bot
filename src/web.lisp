@@ -26,18 +26,17 @@
 ;; Handlers that starts/stops stream dependent services
 (define-handler ("service-starter" :type :stream-started)
   (log:info "starting stream-dependent services...")
-    (ida-bot.services:start-services :stream-dependent t))
+  (ida-bot.services:start-services :stream-dependent t))
 
 (define-handler ("service-ender" :type :stream-stopped)
   (log:info "stopping stream-dependent services...")
-    (ida-bot.services:stop-services :stream-dependent t))
+  (ida-bot.services:stop-services :stream-dependent t))
 
 ;;
 ;; Routing rules
 
 @route POST "/webhook"
 (defun parse-webhooks (&key _parsed)
-  (format t "~A~%" _parsed)
   (run-handlers _parsed)
   (process-commands _parsed))
   

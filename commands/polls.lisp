@@ -9,10 +9,21 @@ values are vote counts")
 (defvar *poll-expiry-time* nil
   "time that the current poll expires")
 
+(defvar *voter-ids* nil
+  "this is where we keep track of who all has voted")
+
 (defvar *poll-started-format*
   "Poll started! Vote with !vote <poll option>
 
 ~:{Option ~A: ~A~%~}")
+
+;; defines a new command "!cancel_poll that can only be ran by moderators
+;; it cancels any currently running poll
+(define-command ("cancel_poll" :moderator-only t)
+  (setf *current-poll* nil
+        *poll-expiry-time* nil
+        *voter-ids* nil)
+  (send-chat "Poll was canceled"))
 
 ;; defines a new command "!poll" that can only be ran by moderators
 ;; example usage: !poll 5 option1, option2
@@ -20,7 +31,8 @@ values are vote counts")
 (define-command ("poll" :moderator-only t)
   (setf *current-poll* (make-hash-table :size 4))
   (let* ((command-parms (str:words *command-message*))
-         (time-limit (first command-parms))
+         (time-limit (or (parse-integer (first command-parms) :junk-allowed t)
+                         5))
          (poll-options (loop :with poll-options := (str:split #\, (apply #'str:concat (rest command-parms)))
                              :for option :in poll-options
                              :for index :from 1 :upto (length poll-options)
@@ -37,9 +49,13 @@ values are vote counts")
 ;; example usage: !vote 1
 ;; this applies a single vote for option 1 
 (define-command ("vote")
-  (let* ((input (first (str:words *command-message*)))
-         (option (gethash input *current-poll* nil)))
-    (when option  ;; so we dont accidentally vote for an option that doesn't exist
+  (let* ((input (parse-integer (first (str:words *command-message*)) :junk-allowed t))
+         (option (gethash input *current-poll* nil))
+         (user-id (agetf (agetf *command-data* "user") "id")))
+    ;; so we dont accidentally vote for an option that doesn't exist
+    ;; or let someone vote more than once
+    (when (and option (not (member user-id *voter-ids* :test #'equal)))
+      (push user-id *voter-ids*)
       (setf (gethash input *current-poll*)
             (list :option (getf option :option)
                   :votes (1+ (getf option :votes)))))))
@@ -64,7 +80,8 @@ values are vote counts")
 
                                   :finally (return winning-option))))
         (setf *poll-expiry-time* nil
-              *current-poll* nil)
+              *current-poll* nil
+              *voter-ids* nil)
         (if (str:emptyp winning-option)
             (send-chat "There was no poll winner :c")
             (send-chat (format nil "Poll ended! Winner is: ~A" winning-option)))))))
