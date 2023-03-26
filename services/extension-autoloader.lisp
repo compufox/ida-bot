@@ -12,10 +12,10 @@
   ;; defines a service that checks for new extensions placed in the user's extension directory
   ;; if it sees an extension that isn't loaded it loads it.
   ;;
-  ;; by default checks every 5 minutes
+  ;; by default checks every 10 minutes
   ;; can be custmoized by setting autoloader-timeout in your config (see config.example)
-  (define-service ("extension-autoloader" :start-immediately t)
-    (after-every ((env :autoloader-timeout 5) :minutes)
+  (define-service ("extension-autoloader")
+    (after-every ((env :autoloader-timeout 10) :minutes)
       (loop :for file :in (uiop:directory-files (getf opts :extension-directory "./extensions/") "*.lisp")
             :unless (member file *loaded-extensions* :test #'equal)
               :do (load file)

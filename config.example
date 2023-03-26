@@ -17,7 +17,7 @@ automod-banned-words = poopy, stinky, doodoohead
 autoban-strike-count = 2
 
 # autoloader service will check for new extensions based on a timeout (in minutes) that is customizable below
-#  defaults to 5 minutes
+#  defaults to 10 minutes
 autoloader-timeout = 20
 
 # config refresher can be configured to poll the config file every X minutes
