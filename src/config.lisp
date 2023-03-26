@@ -9,13 +9,15 @@
            :*static-directory*
            :appenv
            :developmentp
-           :productionp))
+           :productionp
+           :load-config))
 (in-package :ida-bot.config)
 
 (setf (config-env-var) "APP_ENV")
 
 (defparameter *application-root*   (asdf:system-source-directory :ida-bot))
 (defparameter *static-directory*   (merge-pathnames #P"static/" *application-root*))
+(defvar *config-file* nil)
 
 (defconfig :common
   `(:databases ((:maindb :sqlite3 :database-name ":memory:"))))
@@ -43,4 +45,12 @@
 
 (defun env (key &optional default)
   (or (config key)
-      (conf:config key default)))
+      (conf:config key default *config-file*)))
+
+(defun load-config (file)
+  (handler-case 
+      (let ((alst (conf:load-config file :parse-lists nil :set-internal-var nil)))
+        (when alst
+          (setf *config-file* alst)))
+    (error (e)
+      (log:error "Encountered error loading config file: ~A~%" e))))

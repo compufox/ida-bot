@@ -113,7 +113,7 @@
       (setf (uiop:getenv "APP_ENV") "production"))
 
     (if (getf opts :config)
-        (conf:load-config (getf opts :config) :parse-lists nil)
+        (ida-bot.config:load-config (getf opts :config))
         (progn
           (format t "please specify a config file to use")
           (uiop:quit 1)))
