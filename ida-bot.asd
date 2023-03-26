@@ -34,7 +34,7 @@
                  (:file "owncast" :depends-on ("util" "config"))
                  (:file "services" :depends-on ("util" "conditions"))
                  (:file "handlers" :depends-on ("util" "conditions"))
-                 (:file "commands" :depends-on ("util"))
+                 (:file "commands" :depends-on ("util" "owncast"))
                  (:file "util" :depends-on ("conditions"))
                  (:file "conditions")
                  (:file "config"))))

@@ -12,6 +12,9 @@
 (defvar *command-message* ""
   "string containing the command chat message minus the command string itself")
 
+(defvar *moderator-only-message* "You do not have permission to use that command"
+  "")
+
 (defvar *commands* (make-hash-table :test 'equal)
   "hash-table of commands
 
@@ -34,9 +37,11 @@ value is command function")
                                 (str:starts-with-p ,cmd (agetf event-data "body")))
                        (let ((*command-message* (str:replace-first ,cmd "" (agetf event-data "body"))))
                          ,@(if moderator-only
-                               `((when (member "MODERATOR" (agetf (agetf event-data "user") "scopes")
-                                               :test #'string=)
-                                   ,@body))
+                               `((if (member "MODERATOR" (agetf (agetf event-data "user") "scopes")
+                                             :test #'string=)
+                                     (progn ,@body)
+                                     (ida-bot.actions:send-system-chat-to-client (agetf (agetf event-data "user") "clientId")
+                                                                                 *moderator-only-message*)))
                                `(,@body))))))))))
 
 (defun process-commands (message)
