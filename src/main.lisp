@@ -137,9 +137,6 @@
     (if (agetf (get-current-status) "online")
         (ida-bot.services:start-services :all t)
         (ida-bot.services:start-services))
-
-    ;; load the saved list of moderator ids
-    (ida-bot.moderator:load-moderator-list)
   
     (let ((server #+(and Unix SBCL) :woo
                   #-(and Unix SBCL) :hunchentoot))
@@ -164,7 +161,4 @@
       (stop)
       
       ;; this stops all of our background threads
-      (ida-bot.services:stop-services :all t)
-
-      ;; this ensures we save our list of moderator user ids
-      (ida-bot.moderator:save-moderator-list))))
+      (ida-bot.services:stop-services :all t))))

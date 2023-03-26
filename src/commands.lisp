@@ -1,5 +1,5 @@
 (defpackage ida-bot.commands
-  (:use :cl :ida-bot.util :ida-bot.moderator)
+  (:use :cl :ida-bot.util)
   (:export :define-command
    :process-commands
    :*command-data*
@@ -34,7 +34,8 @@ value is command function")
                                 (str:starts-with-p ,cmd (agetf event-data "body")))
                        (let ((*command-message* (str:replace-first ,cmd "" (agetf event-data "body"))))
                          ,@(if moderator-only
-                               `((when (moderator-p (agetf (agetf event-data "user") "id"))
+                               `((when (member "MODERATOR" (agetf (agetf event-data "user") "scopes")
+                                               :test #'string=)
                                    ,@body))
                                `(,@body))))))))))
 

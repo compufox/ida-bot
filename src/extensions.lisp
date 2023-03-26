@@ -35,6 +35,5 @@
 (defpackage ida-bot.extension
   (:use :cl :ida-bot.util :ida-bot.commands
         :ida-bot.actions :ida-bot.config
-        :ida-bot.services :ida-bot.handler
-        :ida-bot.moderator))
+        :ida-bot.services :ida-bot.handler))
 (in-package :ida-bot.extension)

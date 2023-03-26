@@ -28,15 +28,14 @@
                                             "owncast" "util"))
                  (:file "extensions" :depends-on ("owncast" "services" "commands"
                                                   "util" "config" "web" "handlers"
-                                                  "conditions" "moderators"))
-                 (:file "web" :depends-on ("util" "commands" "handlers" "moderators"
+                                                  "conditions"))
+                 (:file "web" :depends-on ("util" "commands" "handlers"
                                            "services"))
                  (:file "owncast" :depends-on ("util" "config"))
                  (:file "services" :depends-on ("util" "conditions"))
                  (:file "handlers" :depends-on ("util" "conditions"))
-                 (:file "commands" :depends-on ("util" "moderators"))
+                 (:file "commands" :depends-on ("util"))
                  (:file "util" :depends-on ("conditions"))
-                 (:file "moderators")
                  (:file "conditions")
                  (:file "config"))))
   :description ""
