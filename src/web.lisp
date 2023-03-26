@@ -8,7 +8,8 @@
    :process-commands)
   (:import-from :ida-bot.handler
    :run-handlers
-   :define-handler)
+   :define-handler
+   :*handler-data*)
   (:export :*web*))
 (in-package :ida-bot.web)
 
@@ -28,7 +29,18 @@
     (let ((user-id (agetf (agetf *handler-data* "user") "id")))
       (when (and (member "MODERATOR" (agetf *handler-data* "scopes") :test #'equal)
                  (not (moderator-p user-id)))
+        (log:info "Logging new moderator: ~A" user-id)
         (push user-id ida-bot.moderator::*moderator-list*))))
+
+;;
+;; Handlers that starts/stops stream dependent services
+(define-handler ("service-starter" :type :stream-started)
+  (log:info "starting stream-dependent services...")
+    (ida-bot.services:start-services :stream-dependent t))
+
+(define-handler ("service-ender" :type :stream-stopped)
+  (log:info "stopping stream-dependent services...")
+    (ida-bot.services:stop-services :stream-dependent t))
 
 ;;
 ;; Routing rules

@@ -25,11 +25,12 @@
   :components ((:module "src"
                 :components
                 ((:file "main" :depends-on ("web" "config" "commands" "extensions"
-                                            "owncast"))
+                                            "owncast" "util"))
                  (:file "extensions" :depends-on ("owncast" "services" "commands"
                                                   "util" "config" "web" "handlers"
                                                   "conditions" "moderators"))
-                 (:file "web" :depends-on ("util" "commands" "handlers" "moderators"))
+                 (:file "web" :depends-on ("util" "commands" "handlers" "moderators"
+                                           "services"))
                  (:file "owncast" :depends-on ("util" "config"))
                  (:file "services" :depends-on ("util" "conditions"))
                  (:file "handlers" :depends-on ("util" "conditions"))

@@ -15,7 +15,8 @@
    :parse-time
    :ensure-list
    :log-info
-   :log-debug))
+   :log-debug
+   :quit-app))
 
 (in-package ida-bot.util)
 
@@ -89,3 +90,12 @@ if RUN-IMMEDIATELY is non-nil, runs BODY once before waiting for next invocation
 (defmacro log-debug (&rest args)
   `(when (log:debug) (log:debug ,@args)))
 
+(defun quit-app (code &rest args)
+  "quits the app with specified CODE
+
+ARGS, if passed, are treated as parameters for FORMAT and are used as such"
+  (when args
+    (funcall #'format `(t ,@args)))
+
+  (uiop:quit code))
+  

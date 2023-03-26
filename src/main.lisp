@@ -36,11 +36,11 @@
 
 (in-package :cl-user)
 (defpackage ida-bot
-  (:use :cl :with-user-abort)
+  (:use :cl :with-user-abort :ida-bot.util)
   (:import-from :ida-bot.config
    :env)
   (:import-from :ida-bot.actions
-                :get-current-status)
+   :get-current-status)
   (:import-from :clack
    :clackup)
   (:import-from :unix-opts
@@ -101,29 +101,36 @@
   "our binary entry point"
   (multiple-value-bind (opts args) (get-opts)
     (when (getf opts :version)
-      (format t "ida-bot v~A~&" #.(asdf:component-version (asdf:find-system :ida-bot)))
-      (uiop:quit 0))
+      (quit-app 0 "ida-bot v~A~&" #.(asdf:component-version (asdf:find-system :ida-bot))))
     
     (when (getf opts :help)
       (unix-opts:describe
        :usage-of "idabot")
-      (uiop:quit 0))
+      (quit-app 0))
     
     (when (getf opts :prod)
       (setf (uiop:getenv "APP_ENV") "production"))
 
     (if (getf opts :config)
-        (ida-bot.config:load-config (getf opts :config))
-        (progn
-          (format t "please specify a config file to use")
-          (uiop:quit 1)))
-  
+        (if (uiop:file-exists-p (getf opts :config))
+            (ida-bot.config:load-config (getf opts :config))
+            (quit-app 1 "Specified config file does not exist.~&"))
+        (quit-app 1 "Please specify a config file.~&"))
+
+    ;; load all of our extensions either from the
+    ;; user specified directory or the standard "./extensions" directory
     (ida-bot.extension-loader:load-extensions
      (getf opts :extension-directory "./extensions/"))
 
+    ;; if the stream is currently going, make sure
+    ;; to start ALL services. otherwise we just
+    ;; start the ones that dont need the stream to be up and running
     (if (agetf (get-current-status) "online")
         (ida-bot.services:start-services :all t)
         (ida-bot.services:start-services))
+
+    ;; load the saved list of moderator ids
+    (ida-bot.moderator:load-moderator-list)
   
     (let ((server #+(and Unix SBCL) :woo
                   #-(and Unix SBCL) :hunchentoot))
@@ -141,5 +148,14 @@
         (error (c) (log:error "Woops, an unknown error occured:~&~a~&" c)))
     
       (log:info "~&Quitting bot.")
+
+      ;; here we need to clean up a lil...
+      
+      ;; this stops the actual webserver 
       (stop)
-      (ida-bot.services:stop-services :all t))))
+      
+      ;; this stops all of our background threads
+      (ida-bot.services:stop-services :all t)
+
+      ;; this ensures we save our list of moderator user ids
+      (ida-bot.moderator:save-moderator-list))))
