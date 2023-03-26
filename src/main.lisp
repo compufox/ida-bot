@@ -115,13 +115,22 @@
         (if (uiop:file-exists-p (getf opts :config))
             (ida-bot.config:load-config (getf opts :config))
             (quit-app 1 "Specified config file does not exist.~&"))
-        (quit-app 1 "Please specify a config file.~&"))
+      (quit-app 1 "Please specify a config file.~&"))
+
+    ;; defines a service that checks every 5 minutes (configurable) if the config file has 
+    ;; been updated and reloads it, so we have a fresh version in memory
+    (ida-bot.services:define-service ("config-refresher")
+      (after-every ((env :refresh-config 5) :minutes)
+                   ;; check to see if the file's ATIME is newer than our cached version
+        (when (ida-bot.config:config-stale-p)
+          (log:info "Reloading config...")
+          (ida-bot.config:load-config))))
 
     ;; load all of our extensions either from the
     ;; user specified directory or the standard "./extensions" directory
     (ida-bot.extension-loader:load-extensions
      (getf opts :extension-directory "./extensions/"))
-
+    
     ;; if the stream is currently going, make sure
     ;; to start ALL services. otherwise we just
     ;; start the ones that dont need the stream to be up and running
