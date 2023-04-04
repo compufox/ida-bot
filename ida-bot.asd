@@ -30,13 +30,14 @@
                                             "owncast" "util"))
                  (:file "extensions" :depends-on ("owncast" "services" "commands"
                                                   "util" "config" "web" "handlers"
-                                                  "conditions"))
+                                                  "conditions" "routes"))
                  (:file "web" :depends-on ("util" "commands" "handlers"
                                            "services"))
                  (:file "owncast" :depends-on ("util" "config"))
                  (:file "services" :depends-on ("util" "conditions"))
                  (:file "handlers" :depends-on ("util" "conditions"))
                  (:file "commands" :depends-on ("util" "owncast"))
+                 (:file "routes" :depends-on ("util" "web"))
                  (:file "util" :depends-on ("conditions"))
                  (:file "conditions")
                  (:file "config"))))
