@@ -1,6 +1,6 @@
 (in-package :cl-user)
 (defpackage ida-bot.web
-  (:use :cl :caveman2)
+  (:use :cl :caveman2 :cl-markup)
   (:import-from :ida-bot.util
    :agetf)
   (:import-from :ida-bot.commands
@@ -34,9 +34,7 @@
 
 ;;
 ;; Routing rules
-
-@route POST "/webhook"
-(defun parse-webhooks (&key _parsed)
+(defroute ("/webhook" :method :POST) (&key _parsed)
   (run-handlers _parsed)
   (process-commands _parsed))
   
@@ -46,5 +44,4 @@
 
 (defmethod on-exception ((app <web>) (code (eql 404)))
   (declare (ignore app))
-  (merge-pathnames #P"_errors/404.html"
-                   *template-directory*))
+  (html5 (:body (:p "404 - Page Not Found" :style "font-size: 100pt"))))

@@ -21,7 +21,9 @@
 
                "simple-config"
                "unix-opts"
-               "drakma")
+               "drakma"
+               "cl-markup"
+               "parenscript")
   :components ((:module "src"
                 :components
                 ((:file "main" :depends-on ("web" "config" "commands" "extensions"
