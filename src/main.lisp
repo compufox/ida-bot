@@ -16,7 +16,7 @@
 
 (defun get-builder ()
   (builder
-   nil
+   (:static :path "/static/" :root *static-directory*)
    (if (productionp)
        nil
        :accesslog)
@@ -78,6 +78,11 @@
    :short #\d
    :long "extension-dir"
    :arg-parser #'string
+   :meta-var "DIRECTORY")
+  (:name :static-directory
+   :description "specifies where static files will be located"
+   :long "static-directory"
+   :arg-parser #'pathname
    :meta-var "DIRECTORY"))
 
 (defvar *handler* nil)
@@ -115,7 +120,13 @@
         (if (uiop:file-exists-p (getf opts :config))
             (ida-bot.config:load-config (getf opts :config))
             (quit-app 1 "Specified config file does not exist.~&"))
-      (quit-app 1 "Please specify a config file.~&"))
+        (quit-app 1 "Please specify a config file.~&"))
+
+    (if (getf opts :static-directory)
+        (if (uiop:directory-exists-p (getf opts :static-directory))
+            (setf ida-bot.config:*static-directory* (getf opts :static-directory))
+            (quit-app 1 "Provided static directory does not exist.~%"))
+        (setf ida-bot.config:*static-directory* (merge-pathnames #P"static/" (uiop:getcwd))))
 
     ;; defines a service that checks every 5 minutes (configurable) if the config file has 
     ;; been updated and reloads it, so we have a fresh version in memory
