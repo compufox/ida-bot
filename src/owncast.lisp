@@ -8,11 +8,19 @@
   
   (:export
 
+   :send-chat*
+   :send-system-chat*
+   :send-system-chat-to-client*
    :send-chat
    :send-system-chat
    :send-system-chat-to-client
+   :send-chat-action
    :moderate-chat
-   :moderate-user))
+
+   :get-connected-clients
+   :get-chat-backlog
+   :get-information
+   :get-current-status))
 (in-package :ida-bot.actions)
 
 (defun owncast-request (api-path &key payload (method :post) (content-type "application/json"))
@@ -32,7 +40,19 @@
                    :payload 
                    `(("value" . ,new-title))))
 
-;; chat functions 
+;; chat functions
+
+;; * macros expand all arguments out into calls to format before
+;;  calling the appropriate send-chat function
+(defmacro send-chat* (format &rest rest)
+  `(send-chat (format nil ,format ,@rest)))
+
+(defmacro send-system-chat* (format &rest rest)
+  `(send-system-chat (format nil ,format ,@rest)))
+
+(defmacro send-system-chat-to-client* (client-id format &rest rest)
+  `(send-system-chat-to-client client-id (format nil ,format ,@rest)))
+
 (defun send-chat (message)
   "sends a chat message to the configured server"
   (owncast-request "/api/integrations/chat/send"
