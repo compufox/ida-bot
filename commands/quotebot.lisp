@@ -10,10 +10,11 @@
   (sqlite:with-open-database (db "quotes.db")
     (sqlite:execute-non-query db "create table quotes (id integer primary key, user text not null, quote text not null)")))
 
+;; returns a random username from the quotes database
 (defun quotes-get-random-user ()
   (sqlite:with-open-database (db "quotes.db")
-    (let ((users (sqlite:execute-to-list db "select unique(user) from quotes")))
-      (alexandria:random-elt users))))
+    (let ((users (sqlite:execute-to-list db "select distinct(user) from quotes")))
+      (car (alexandria:random-elt users)))))
 
 ;; creates a command to add a new quote
 (define-command ("addquote")
@@ -34,5 +35,6 @@
                        (quotes-get-random-user)
                        (first (str:words *command-message*))))
              (quotes (sqlite:execute-to-list db "select quote from quotes where user = ?" user))
-             (quote (alexandria:random-elt quotes)))
-        (send-chat* "**~A**: ~A" user quote))))
+             (quote (when quotes (car (alexandria:random-elt quotes)))))
+        (if quote (send-chat* "**~A**: ~A" user quote)
+            (send-chat* "Unable to find any quotes for user ~A :/" user)))))
