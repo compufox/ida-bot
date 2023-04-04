@@ -24,10 +24,6 @@
        `(:backtrace
          :output ,(env :error-log))
        nil)
-   :session
-   (if (productionp)
-       nil
-       nil)
    *web*))
 
 ;; 
@@ -68,7 +64,7 @@
    :arg-parser #'string
    :meta-var "FILE")
   (:name :prod
-   :description "enabled production mode"
+   :description "enabled production mode (disables route logging)"
    :long "production")
   (:name :version
    :description "prints application version"
@@ -122,6 +118,8 @@
             (quit-app 1 "Specified config file does not exist.~&"))
         (quit-app 1 "Please specify a config file.~&"))
 
+    ;; sets our static directory if provided.
+    ;; otherwise it sets it to the default of "./static/"
     (if (getf opts :static-directory)
         (if (uiop:directory-exists-p (getf opts :static-directory))
             (setf ida-bot.config:*static-directory* (getf opts :static-directory))
