@@ -12,8 +12,11 @@
 (defvar *command-message* ""
   "string containing the command chat message minus the command string itself")
 
-(defvar *moderator-only-message* "You do not have permission to use that command"
-  "")
+(defvar *moderator-only-message* "Only moderators have permission to use this command"
+  "message sent to non-moderator users when they try to run a command marked as moderator only")
+
+(defvar *authenticated-only-message* "Only authenticated users have permission to use this command"
+  "message sent to unauthenticated users when they try to run a command marked as authenticated users only")
 
 (defvar *commands* (make-hash-table :test 'equal)
   "hash-table of commands
@@ -21,8 +24,11 @@
 key is command string
 value is command function")
 
-(defmacro define-command ((command &key moderator-only) &body body)
-  "create a command COMMAND"
+(defmacro define-command ((command &key moderator-only authenticated-only) &body body)
+  "create a command COMMAND
+
+if MODERATOR-ONLY is non-nil then the command can only be ran by users marked as moderators
+if AUTHENTICATED-ONLY is non-nil then the command can only be ran by chatters who are authenticated"
   (let ((cmd (str:concat "!" command)))
     
     ;; ensure each command has unique commands
@@ -42,7 +48,12 @@ value is command function")
                                      (progn ,@body)
                                      (ida-bot.actions:send-system-chat-to-client (agetf (agetf event-data "user") "clientId")
                                                                                  *moderator-only-message*)))
-                               `(,@body))))))))))
+                               (if authenticated-only
+                                   `((if (agetf (agetf event-data "user") "authenticated")
+                                         (progn ,@body)
+                                         (ida-bot.actions:send-system-chat-to-client (agetf (agetf event-data "user") "clientId")
+                                                                                     *authenticated-only-message*)))
+                                     `(,@body)))))))))))
 
 (defun process-commands (message)
   "process each command based on priority"
