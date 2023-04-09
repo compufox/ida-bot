@@ -12,6 +12,8 @@
 (defvar *command-message* ""
   "string containing the command chat message minus the command string itself")
 
+(defvar *unauthorized-message* "You are unauthorized to use this command")
+
 (defvar *moderator-only-message* "Only moderators have permission to use this command"
   "message sent to non-moderator users when they try to run a command marked as moderator only")
 
@@ -42,18 +44,17 @@ if AUTHENTICATED-ONLY is non-nil then the command can only be ran by chatters wh
                      (when (and (check-type-symbol :chat event-type)
                                 (str:starts-with-p ,cmd (agetf event-data "body")))
                        (let ((*command-message* (str:replace-first ,cmd "" (agetf event-data "body"))))
-                         ,@(if moderator-only
-                               `((if (member "MODERATOR" (agetf (agetf event-data "user") "scopes")
-                                             :test #'string=)
-                                     (progn ,@body)
-                                     (ida-bot.actions:send-system-chat-to-client (agetf (agetf event-data "user") "clientId")
-                                                                                 *moderator-only-message*)))
-                               (if authenticated-only
-                                   `((if (agetf (agetf event-data "user") "authenticated")
-                                         (progn ,@body)
-                                         (ida-bot.actions:send-system-chat-to-client (agetf (agetf event-data "user") "clientId")
-                                                                                     *authenticated-only-message*)))
-                                     `(,@body)))))))))))
+                         ,@(if (or moderator-only authenticated-only) ;; if we say one or the other
+                              `((if (,(if (and moderator-only authenticated-only) 'and 'or) ;; if we specify them both ensure we check both
+                                     (and ,moderator-only
+                                          (member "MODERATOR" (agetf (agetf event-data "user") "scopes")
+                                                  :test #'string=))
+                                     (and ,authenticated-only
+                                          (agetf (agetf event-data "user") "authenticated")))
+                                    (progn ,@body)
+                                    (ida-bot.actions:send-system-chat-to-client (agetf (agetf event-data "user") "clientId")
+                                                                                 *unauthorized-message*)))
+                              `(,@body))))))))))
 
 (defun process-commands (message)
   "process each command based on priority"
