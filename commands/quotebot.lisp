@@ -1,7 +1,7 @@
 (in-package :ida-bot.extension)
 
 ;; load a SQLite3 library from Quicklisp
-(ql:quickload :sqlite)
+(ql:quickload :sqlite :silent t)
 
 ;; create our database if it doesnt exist
 ;; and initialize the database schema
